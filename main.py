@@ -22,7 +22,7 @@ a = Account(USERNAME, PASSWORD)
 end = time()
 print(str((end - start)/60)[:4] + "s")
 print("|--------------------------------------------------")
-servers_to_get = ["XS97wsJVTQpx9kb8","Tlok9VtWOlZu0inn","PBFElolI6WTcNIU9"]
+servers_to_get = ["XS97wsJVTQpx9kb8"]
 minecraft_servers = []
 
 for server in a.servers:
