@@ -1,0 +1,7 @@
+.env
+.pytest_cache
+.vscode
+.idea
+aternos_code
+
+*.log

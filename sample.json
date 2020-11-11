@@ -1,0 +1,41 @@
+{
+  "bedrock": false,
+  "brand": "aternos",
+  "change": 1605087357,
+  "class": "offline",
+  "countdown": null,
+  "deprecated": false,
+  "dns": {
+    "domains": [
+      "rafaelolo.aternos.me"
+    ],
+    "host": null,
+    "port": null,
+    "type": "DEFAULT"
+  },
+  "dynip": null,
+  "headstarts": null,
+  "host": "",
+  "icon": "fa-stop-circle",
+  "id": "Tlok9VtWOlZu0inn",
+  "ip": "rafaelolo.aternos.me",
+  "label": "Hors ligne",
+  "lang": "offline",
+  "message": {
+    "class": "blue",
+    "text": ""
+  },
+  "motd": "Bienvenue sur mon super serveur !",
+  "name": "rafaelolo",
+  "playerlist": [],
+  "players": 0,
+  "port": 39496,
+  "problems": 0,
+  "queue": null,
+  "ram": 0,
+  "slots": 20,
+  "software": "Vanilla",
+  "status": 0,
+  "type": "vanilla",
+  "version": "1.13"
+}
