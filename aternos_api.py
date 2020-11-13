@@ -70,7 +70,6 @@ class Account(object):
 		desired = DesiredCapabilities.FIREFOX
 
 		self.driver = webdriver.Firefox(options=options, firefox_profile=profile, desired_capabilities=desired)
-		self.driver.set
 		# self.driver = webdriver.Firefox(options=options)
 
 		print(self.driver.execute_script("return navigator.userAgent;"))
