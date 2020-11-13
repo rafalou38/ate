@@ -53,7 +53,7 @@ class Account(object):
 		self.user = user
 		self.password = password
 		options = Options()
-		# options.headless = True
+		options.headless = True
 		# options.set_preference("dom.webdriver.enabled", False)
 
 		profile = webdriver.FirefoxProfile(
