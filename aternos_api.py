@@ -4,6 +4,7 @@ import time
 
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -52,11 +53,30 @@ class Account(object):
 		self.user = user
 		self.password = password
 		options = Options()
-		options.headless = True
-		self.driver = webdriver.Firefox(options=options)
+		# options.headless = True
+		# options.set_preference("dom.webdriver.enabled", False)
+
+		profile = webdriver.FirefoxProfile(
+			)
+
+		# PROXY_HOST = "12.12.12.123"
+		# PROXY_PORT = "1234"
+		# profile.set_preference("network.proxy.type", 1)
+		# profile.set_preference("network.proxy.http", PROXY_HOST)
+		# profile.set_preference("network.proxy.http_port", int(PROXY_PORT))
+		profile.set_preference("dom.webdriver.enabled", False)
+		profile.set_preference('useAutomationExtension', False)
+		profile.update_preferences()
+		desired = DesiredCapabilities.FIREFOX
+
+		self.driver = webdriver.Firefox(options=options, firefox_profile=profile, desired_capabilities=desired)
+		self.driver.set
+		# self.driver = webdriver.Firefox(options=options)
+
+		print(self.driver.execute_script("return navigator.userAgent;"))
 
 		self.driver.implicitly_wait(10)
-		self.driver.set_window_rect(**{'x': 1912, 'y': 295, 'width': 1382, 'height': 744})
+		# self.driver.set_window_rect(**{'x': 1912, 'y': 295, 'width': 1382, 'height': 744})
 		self._servers = None
 		self.login()
 		atexit.register(self.close)
