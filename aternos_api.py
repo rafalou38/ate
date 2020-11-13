@@ -9,8 +9,6 @@ from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
 
-from fake_useragent import UserAgent
-
 parser = argparse.ArgumentParser(description='Aternos API')
 
 parser.add_argument("-v", "--verbose", help="show timed actions", action="store_true")
