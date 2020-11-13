@@ -51,9 +51,9 @@ class Account(object):
 	def __init__(self, user, password):
 		self.user = user
 		self.password = password
-		# options = Options()
-		# options.headless = True
-		self.driver = webdriver.Firefox()#options=options)
+		options = Options()
+		options.headless = True
+		self.driver = webdriver.Firefox(options=options)
 
 		self.driver.implicitly_wait(10)
 		self.driver.set_window_rect(**{'x': 1912, 'y': 295, 'width': 1382, 'height': 744})
@@ -64,7 +64,7 @@ class Account(object):
 	def login(self):
 		self.driver.get("https://aternos.org/go/")
 		sleep(0.1, "get url")
-
+		print(self.driver.page_source)
 		usr_input = self.driver.find_element_by_id("user")
 		pass_input = self.driver.find_element_by_id("password")
 		login_btn = self.driver.find_element_by_id("login")
