@@ -53,7 +53,7 @@ class Account(object):
 		self.password = password
 		options = Options()
 		options.headless = True
-		self.driver = webdriver.Firefox(firefox_binary="/app/vendor/geckodriver/geckodriver",options=options)
+		self.driver = webdriver.Firefox(options=options)
 
 		self.driver.implicitly_wait(10)
 		self.driver.set_window_rect(**{'x': 1912, 'y': 295, 'width': 1382, 'height': 744})
