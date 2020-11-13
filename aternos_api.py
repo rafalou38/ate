@@ -1,18 +1,35 @@
 import argparse
 import atexit
+import os
 import time
 
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import DesiredCapabilities
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
+
+from fake_useragent import UserAgent
 
 parser = argparse.ArgumentParser(description='Aternos API')
 
 parser.add_argument("-v", "--verbose", help="show timed actions", action="store_true")
 args = parser.parse_args()
 verbose = args.verbose
+
+
+"""
+BUILDPACK: https://github.com/evosystem-jp/heroku-buildpack-firefox
+
+VARS:
+	FIREFOX_BIN=/app/vendor/firefox/firefox
+	GECKODRIVER_PATH=/app/vendor/geckodriver/geckodriver
+	PATH=/app/.heroku/python/bin:/app/.apt/usr/bin:/app/vendor/firefox:/app/vendor/geckodriver:/usr/local/bin:/usr/bin:/bin
+
+
+
+"""
+
 
 
 def sleep(t, nom=""):
@@ -53,23 +70,30 @@ class Account(object):
 		self.user = user
 		self.password = password
 		options = Options()
-		options.headless = True
-		# options.set_preference("dom.webdriver.enabled", False)
-
-		profile = webdriver.FirefoxProfile(
-			)
-
+		options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+		options.add_experimental_option("excludeSwitches", ["enable-logging", "enable-automation"])
+		options.add_experimental_option('useAutomationExtension', False)
+		options.add_argument("--disable-blink-features=AutomationControlled")
+		options.add_argument("--headless")
+		options.add_argument("--disable-dev-shm-usage")
+		options.add_argument("--no-sandbox")
+		# useragent = UserAgent()
+		# profile = webdriver.FirefoxProfile(
+		# 	)
+		# profile.set_preference("general.useragent.override", useragent.random)
 		# PROXY_HOST = "12.12.12.123"
 		# PROXY_PORT = "1234"
 		# profile.set_preference("network.proxy.type", 1)
 		# profile.set_preference("network.proxy.http", PROXY_HOST)
 		# profile.set_preference("network.proxy.http_port", int(PROXY_PORT))
-		profile.set_preference("dom.webdriver.enabled", False)
-		profile.set_preference('useAutomationExtension', False)
-		profile.update_preferences()
-		desired = DesiredCapabilities.FIREFOX
-
-		self.driver = webdriver.Firefox(options=options, firefox_profile=profile, desired_capabilities=desired)
+		# profile.set_preference("dom.webdriver.enabled", False)
+		# profile.set_preference('useAutomationExtension', False)
+		# profile.update_preferences()
+		# desired = DesiredCapabilities.FIREFOX
+		# self.driver = webdriver.Firefox(options=options, firefox_profile=profile, desired_capabilities=desired)
+		self.driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options)
+		self.driver.execute_cdp_cmd('Network.setUserAgentOverride', {
+			"userAgent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.53 Safari/537.36'})
 		# self.driver = webdriver.Firefox(options=options)
 
 		print(self.driver.execute_script("return navigator.userAgent;"))
@@ -83,7 +107,7 @@ class Account(object):
 	def login(self):
 		self.driver.get("https://aternos.org/go/")
 		sleep(0.1, "get url")
-		print(self.driver.page_source)
+		print(self.driver.title)
 		usr_input = self.driver.find_element_by_id("user")
 		pass_input = self.driver.find_element_by_id("password")
 		login_btn = self.driver.find_element_by_id("login")
