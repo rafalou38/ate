@@ -104,7 +104,6 @@ class Account(object):
 
 	def login(self):
 		self.driver.get("https://aternos.org/go/")
-		sleep(30, "get url")
 		print(self.driver.title)
 		usr_input = self.driver.find_element_by_id("user")
 		pass_input = self.driver.find_element_by_id("password")
