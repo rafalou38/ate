@@ -3,5 +3,6 @@
 .vscode
 .idea
 aternos_code
-__pycache__
 *.log
+*.pyc
+save.json
