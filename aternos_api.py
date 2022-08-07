@@ -1,13 +1,19 @@
 import argparse
 import atexit
 import os
+from random import randint, random, randrange
 import time
 
-from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver import DesiredCapabilities
-from selenium.webdriver.chrome.options import Options
+# from selenium import webdriver
+# from selenium.common.exceptions import NoSuchElementException
+# from selenium.webdriver import DesiredCapabilities
+# from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
+import undetected_chromedriver as uc
+
+
+
+
 
 parser = argparse.ArgumentParser(description='Aternos API')
 
@@ -34,12 +40,17 @@ def sleep(t, nom=""):
 	if verbose:
 		print(nom)
 	t = t * 10
-	for i in range(int(t)):
+	for i in range(int(t))[::-1]:
 		if verbose:
-			print(str(i / 10 + 0.1)[0:3], end="\r", flush=True)
+			print(str(i / 10 + 0.1)[0:3], end="s\r", flush=True)
 		time.sleep(0.1)
 	if verbose:
 		print("\n")
+
+def slow_type(element, text):
+    for character in text:
+        element.send_keys(character)
+        time.sleep(random() / 4 + 0.1)
 
 
 class LoginError(Exception):
@@ -67,14 +78,14 @@ class Account(object):
 	def __init__(self, user, password):
 		self.user = user
 		self.password = password
-		options = Options()
-		options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-		options.add_experimental_option("excludeSwitches", ["enable-logging", "enable-automation"])
-		options.add_experimental_option('useAutomationExtension', False)
-		options.add_argument("--disable-blink-features=AutomationControlled")
-		options.add_argument("--headless")
-		options.add_argument("--disable-dev-shm-usage")
-		options.add_argument("--no-sandbox")
+		# options = Options()
+		# options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+		# options.add_experimental_option("excludeSwitches", ["enable-logging", "enable-automation"])
+		# options.add_experimental_option('useAutomationExtension', False)
+		# options.add_argument("--disable-blink-features=AutomationControlled")
+		# options.add_argument("--headless")
+		# options.add_argument("--disable-dev-shm-usage")
+		# options.add_argument("--no-sandbox")
 		# useragent = UserAgent()
 		# profile = webdriver.FirefoxProfile(
 		# 	)
@@ -89,9 +100,10 @@ class Account(object):
 		# profile.update_preferences()
 		# desired = DesiredCapabilities.FIREFOX
 		# self.driver = webdriver.Firefox(options=options, firefox_profile=profile, desired_capabilities=desired)
-		self.driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options)
-		self.driver.execute_cdp_cmd('Network.setUserAgentOverride', {
-			"userAgent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.53 Safari/537.36'})
+		self.driver = uc.Chrome()
+		# self.driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options)
+		# self.driver.execute_cdp_cmd('Network.setUserAgentOverride', {
+		# 	"userAgent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.53 Safari/537.36'})
 		# self.driver = webdriver.Firefox(options=options)
 
 		print(self.driver.execute_script("return navigator.userAgent;"))
@@ -104,37 +116,44 @@ class Account(object):
 
 	def login(self):
 		self.driver.get("https://aternos.org/go/")
-		sleep(30, "get url")
+		sleep(random() + 0.1)
+
 		print(self.driver.title)
-		usr_input = self.driver.find_element_by_id("user")
-		pass_input = self.driver.find_element_by_id("password")
-		login_btn = self.driver.find_element_by_id("login")
-		error = self.driver.find_element_by_class_name("login-error")
+		
+		usr_input = self.driver.find_element("id","user")
+		pass_input = self.driver.find_element("id","password")
+		login_btn = self.driver.find_element("id","login")
+		# error = self.driver.find_element("id", "login-error")
 
 		usr_input.click()
-		sleep(0.1, "get usr field")
+		sleep(random() + 0.2, "get usr field")
 
-		usr_input.send_keys(self.user)
-		sleep(0.1, "send usr keys")
+		slow_type(usr_input, self.user)
+		sleep(random() + 0.2, "send usr keys")
 
 		pass_input.click()
-		sleep(0.1, "get pass field")
+		sleep(random() + 0.2, "get pass field")
 
-		pass_input.send_keys(self.password)
-		sleep(0.1, "send pass keys")
+		slow_type(pass_input, self.password)
+		sleep(random() + 0.2, "send pass keys")
 
 		login_btn.click()
-		sleep(0.5, "wait for login")
+		sleep(random() + 5, "wait for login")
+
+		try:
+			self.driver.find_element("css selector", "#qc-cmp2-ui button:nth-child(2)").click()
+			sleep(2, "accept cookies")
+		except:
+			pass
+
 		if "server" not in self.driver.current_url:
-			error_text = error.text.strip()
-			if error_text:
-				raise LoginError(error_text)
+			# error_text = error.text.strip()
+			# if error_text:
+			raise LoginError(error_text)
 		self.fetch_servers()
 		if "servers" in self.driver.current_url:
-			self.driver.find_elements_by_class_name("server-body")[0].click()
+			self.driver.find_elements("class name" ,"server-body")[0].click()
 			sleep(0.5, "select server")
-			self.driver.find_element_by_id("accept-choices").click()
-			sleep(2, "accept cookies")
 
 	def is_logged_in(self):
 		return self.driver.get_cookie("ATERNOS_SESSION") is not None
@@ -142,16 +161,16 @@ class Account(object):
 	def fetch_servers(self):
 		if "servers" not in self.driver.current_url:
 			self.driver.get("https://aternos.org/servers/")
-		servers = self.driver.find_elements_by_class_name("server-infos")
+		servers = self.driver.find_elements("class name" ,"server-infos")
 		servers_objets = []
 		for server in servers:
-			server_name = server.find_element_by_class_name("server-name").text.strip()
-			server_id = server.find_element_by_class_name("server-id").text[1:].strip()
-			server_version = server.find_element_by_class_name("server-software").text.strip()
+			server_name = server.find_element("class name" ,"server-name").text.strip()
+			server_id = server.find_element("class name" ,"server-id").text[1:].strip()
+			server_version = server.find_element("class name" ,"server-software").text.strip()
 			try:
-				server_author = server.find_element_by_class_name("server-by-user")
+				server_author = server.find_element("class name" ,"server-by-user")
 				server_author = server_author.text.split(" ")[-1:][0].strip()
-			except NoSuchElementException:
+			except:
 				server_author = self.user
 			servers_objets.append(
 				Server(
@@ -283,8 +302,8 @@ class Server(object):
 
 	def start(self):
 		self._go_to_server_main_page()
-		start = self.account.driver.find_element_by_id("start")
-		restart = self.account.driver.find_element_by_id("restart")
+		start = self.account.driver.find_element("id", "start")
+		restart = self.account.driver.find_element("id", "restart")
 		if restart.is_displayed():
 			restart.click()
 		else:

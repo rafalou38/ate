@@ -15,35 +15,38 @@ load_dotenv()
 USERNAME = os.getenv('USR')
 PASSWORD = os.getenv('PASS')
 TOKEN = os.getenv('DISCORD_TOKEN')
-n = '\n'
-print("|--------------------------------------------------\n| Getting Account :", end="")
-start = time()
-a = Account(USERNAME, PASSWORD)
-end = time()
-print(str((end - start)/60)[:4] + "s")
-print("|--------------------------------------------------")
-servers_to_get = ["XS97wsJVTQpx9kb8"]
+
+servers_to_get = ["Njgbr70gYsMY5ba4"]
 minecraft_servers = []
 
-for server in a.servers:
-	if server.id in servers_to_get:
-		minecraft_servers.append(server)
-
-for minecraft_server in minecraft_servers:
-	print(f"| fetch {minecraft_server.name} :", end="")
+if __name__ == '__main__':
+	n = '\n'
+	print("|--------------------------------------------------\n| Getting Account :", end="")
 	start = time()
-	minecraft_server.fetch()
+	a = Account(USERNAME, PASSWORD)
 	end = time()
-	print(f"{ str((end -start)/60)[:4]}s")
+	print(str((end - start)/60)[:4] + "s")
+	print("|--------------------------------------------------")
+
+	for server in a.servers:
+		if server.id in servers_to_get:
+			minecraft_servers.append(server)
+
+	for minecraft_server in minecraft_servers:
+		print(f"| fetch {minecraft_server.name} :", end="")
+		start = time()
+		minecraft_server.fetch()
+		end = time()
+		print(f"{ str((end -start)/60)[:4]}s")
 
 
-if os.path.exists("save.json"):
-	with open("save.json", "r")as f:
-		servers = json.load(f)
-else:
-	servers = {}
+	if os.path.exists("save.json"):
+		with open("save.json", "r")as f:
+			servers = json.load(f)
+	else:
+		servers = {}
+
 bot = commands.Bot(command_prefix="!aternos")
-
 
 @bot.event
 async def on_ready():
@@ -136,19 +139,23 @@ class CheckServers(commands.Cog):
 		self.check_servers.cancel()
 
 	@commands.Cog.listener()
-	async def on_reaction_add(self, reaction: Reaction, user: User):
+	async def on_raw_reaction_add(self, payload):
+		channel = await self.bot.fetch_channel(payload.channel_id)
+		message = await channel.fetch_message(payload.message_id)
+		user = await self.bot.fetch_user(payload.user_id)
+		emoji = payload.emoji
 		if user.id != bot.user.id:
 			for minecraft_server in minecraft_servers:
-				if reaction.message.id == servers[str(reaction.message.guild.id)][minecraft_server.name]:
-					if reaction.emoji == "🟢":
-						if minecraft_server.status == ("offline", "crashed"):
+				if message.id == servers[str(message.guild.id)][minecraft_server.name]:
+					if emoji.name == "🟢":
+						if minecraft_server.status in ("offline", "crashed"):
 							minecraft_server.start()
-					if reaction.emoji == "🔄":
-						for text_channel in reaction.message.guild.text_channels:
-							if text_channel.id == servers[str(reaction.message.guild.id)]["channel_id"]:
+					if emoji.name == "🔄":
+						for text_channel in message.guild.text_channels:
+							if text_channel.id == servers[str(message.guild.id)]["channel_id"]:
 								await send_embed(text_channel, minecraft_server)
 
-	@tasks.loop(seconds=5.0)
+	@tasks.loop(seconds=10)
 	async def check_servers(self):
 		for server in bot.guilds:
 			if str(server.id) in servers.keys():
@@ -182,13 +189,13 @@ async def on_message(message: discord.message.Message):
 			with open("save.json", "w") as f:
 				json.dump(servers, f, indent=2)
 
+if __name__ == '__main__':
+	bot.add_cog(CheckServers(bot))
 
-bot.add_cog(CheckServers(bot))
-
-try:
-	bot.run(TOKEN)
-except Exception as e:
-	a.close()
-	raise e
+	try:
+		bot.run(TOKEN)
+	except Exception as e:
+		a.close()
+		raise e
 
 # a.close()
